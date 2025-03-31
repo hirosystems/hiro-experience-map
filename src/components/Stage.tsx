@@ -1,7 +1,7 @@
-import { Card } from './Card';
 import { Tag } from './Tag';
+import IssueCard from './IssueCard';
 import styled from 'styled-components';
-import { Star, Gear, Browser, Terminal, Database, Code, Globe, ChartLine, Icon } from '@phosphor-icons/react';
+import { Gear, Browser, Terminal, Database, Code, Globe, ChartLine, Icon, List as ListIcon, Target, Users } from '@phosphor-icons/react';
 import { StageData } from '../types';
 
 const StageWrapper = styled.div`
@@ -18,10 +18,10 @@ const StageWrapper = styled.div`
   }
 `;
 
-const Header = styled.div<{ backgroundColor: string }>`
+const Header = styled.div<{ $backgroundColor: string }>`
   padding: 1rem;
   border-bottom: 1px solid #eee;
-  background-color: ${props => props.backgroundColor};
+  background-color: ${props => props.$backgroundColor};
   height: 64px;
   display: flex;
   align-items: center;
@@ -54,12 +54,22 @@ const Section = styled.div`
   }
 `;
 
+const SectionTitle = styled.div`
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  color: #666;
+  font-size: 0.9rem;
+  font-weight: 500;
+`;
+
 const List = styled.ul`
   margin: 0;
   padding-left: 1.5rem;
   
   li {
     margin-bottom: 0.5rem;
+    color: #333;
     
     &:last-child {
       margin-bottom: 0;
@@ -83,6 +93,7 @@ const touchpointIcons: Record<string, Icon> = {
   'Framework': Terminal,
   'Database': Database,
   'Analytics': ChartLine,
+  'Community': Users,
   'default': Gear
 };
 
@@ -97,47 +108,68 @@ interface StageProps extends StageData {}
 export function Stage({ title, color, stage, actions, touchpoints, painPoints }: StageProps) {
   return (
     <StageWrapper>
-      <Header backgroundColor={color}>
+      <Header $backgroundColor={color}>
         <Title>{title}</Title>
       </Header>
-      <Section>
-        <List>
-          {stage.map((item, index) => (
-            <li key={index}>{item}</li>
-          ))}
-        </List>
-      </Section>
       
-      <Section>
-        <List>
-          {actions.map((item, index) => (
-            <li key={index}>{item}</li>
-          ))}
-        </List>
-      </Section>
+      {stage && stage.length > 0 && (
+        <Section>
+          <SectionTitle>
+            Stage Overview
+          </SectionTitle>
+          <List>
+            {stage.map((item, index) => (
+              <li key={index}>{item}</li>
+            ))}
+          </List>
+        </Section>
+      )}
       
-      <Section>
-        <TagContainer>
-          {touchpoints.map((item, index) => (
-            <Tag 
+      {actions && actions.length > 0 && (
+        <Section>
+          <SectionTitle>
+            Actions
+          </SectionTitle>
+          <List>
+            {actions.map((item, index) => (
+              <li key={index}>{item}</li>
+            ))}
+          </List>
+        </Section>
+      )}
+      
+      {touchpoints && touchpoints.length > 0 && (
+        <Section>
+          <SectionTitle>
+            Touchpoints
+          </SectionTitle>
+          <TagContainer>
+            {touchpoints.map((item, index) => (
+              <Tag 
+                key={index}
+                text={item}
+                icon={getIconForTouchpoint(item)}
+              />
+            ))}
+          </TagContainer>
+        </Section>
+      )}
+      
+      {painPoints && painPoints.length > 0 && (
+        <Section>
+          <SectionTitle>
+            Pain Points
+          </SectionTitle>
+          {painPoints.map((painPoint, index) => (
+            <IssueCard
               key={index}
-              text={item}
-              icon={getIconForTouchpoint(item)}
+              title={painPoint.title}
+              url={painPoint.url}
+              labels={painPoint.labels}
             />
           ))}
-        </TagContainer>
-      </Section>
-      
-      <Section>
-        {painPoints.map((painPoint, index) => (
-          <Card 
-            key={index}
-            title={painPoint.title}
-            description={painPoint.description}
-            icon={Star}
-          />
-        ))}
-      </Section>
+        </Section>
+      )}
     </StageWrapper>
   );
 } 

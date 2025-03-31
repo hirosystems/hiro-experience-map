@@ -7,5 +7,18 @@ export interface StageData {
   painPoints: Array<{
     title: string;
     description: string;
+    issueNumber: number;
+    url: string;
+    status?: string;
+    labels?: string[];
   }>;
+}
+
+export interface PainPoint {
+  title: string;
+  description: string;
+  issueNumber: number;
+  url: string;
+  status?: string;
+  labels?: string[];
 } 
