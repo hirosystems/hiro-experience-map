@@ -1,26 +1,33 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import styled from 'styled-components';
+import { Stage } from './components/Stage';
+import { stages } from './data/stages';
+import './styles/globals.css';
 
-function App() {
+const AppWrapper = styled.div`
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+`;
+
+const StagesGrid = styled.div`
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(${stages.length}, minmax(300px, 1fr));
+  grid-template-rows: 64px auto auto auto 1fr;
+  overflow-x: auto;
+  background: #f5f5f5;
+`;
+
+export function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <AppWrapper>
+      <StagesGrid>
+        {stages.map((stage, index) => (
+          <Stage key={index} {...stage} />
+        ))}
+      </StagesGrid>
+    </AppWrapper>
   );
 }
-
-export default App;
