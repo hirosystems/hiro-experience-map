@@ -18,18 +18,15 @@ interface StagesGridProps {
 
 const StagesGrid = styled.div<StagesGridProps>`
   flex: 1;
-  min-height: 0;
-  display: grid;
-  grid-template-columns: repeat(${props => props.$stageCount}, minmax(300px, 1fr));
-  grid-template-rows: 64px auto auto auto 1fr;
+  display: flex;
   overflow-x: auto;
-  background: #f5f5f5;
 `;
 
 export function App() {
   const [stages, setStages] = useState<StageData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [headerHeight, setHeaderHeight] = useState(0);
 
   useEffect(() => {
     async function loadIssues() {
@@ -67,7 +64,14 @@ export function App() {
     <AppWrapper>
       <StagesGrid $stageCount={stages.length}>
         {stages.map((stage, index) => (
-          <Stage key={index} {...stage} />
+          <Stage 
+            key={index} 
+            {...stage} 
+            $headerHeight={headerHeight}
+            onHeaderHeightChange={(height: number) => {
+              setHeaderHeight(prev => Math.max(prev, height));
+            }}
+          />
         ))}
       </StagesGrid>
     </AppWrapper>

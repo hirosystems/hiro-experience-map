@@ -1,5 +1,6 @@
 export interface StageData {
   title: string;
+  description: string;
   color: string;
   stage: string[];
   actions: string[];

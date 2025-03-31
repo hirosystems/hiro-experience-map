@@ -67,6 +67,7 @@ const PROJECT_QUERY = `
               options {
                 id
                 name
+                description
               }
             }
             ... on ProjectV2FieldCommon {
@@ -161,81 +162,68 @@ interface StageField {
   options?: Array<{
     id: string;
     name: string;
+    description?: string;
   }>;
 }
 
 interface StageMetadata {
   color: string;
   actions: string[];
-  touchpoints: string[];
 }
 
 // Default metadata for stages if not found in GitHub
 const defaultStageMetadata: Record<string, StageMetadata> = {
   'Discovery': {
     color: '#E8F5E9',
-    actions: ['Initial research', 'Explore documentation', 'Join community'],
-    touchpoints: ['Stacks Documentation', 'Discord Community', 'Developer Tools']
+    actions: ['Initial research', 'Explore documentation', 'Join community']
   },
   'Research: Stacks & Hiro': {
     color: '#E3F2FD',
-    actions: ['Review documentation', 'Explore example projects', 'Understand architecture'],
-    touchpoints: ['Hiro Dev Tools', 'Stacks API', 'GitHub Repositories']
+    actions: ['Review documentation', 'Explore example projects', 'Understand architecture']
   },
   'Evaluate: The Stacks Ecosystem': {
     color: '#F3E5F5',
-    actions: ['Evaluate API endpoints', 'Research integration options', 'Review partner solutions'],
-    touchpoints: ['API Documentation', 'Integration Guides', 'Partner Directory']
+    actions: ['Evaluate API endpoints', 'Research integration options', 'Review partner solutions']
   },
   'Evaluate: Tooling & Resources': {
     color: '#FFF3E0',
-    actions: ['Review available tools', 'Assess SDK capabilities', 'Evaluate development resources'],
-    touchpoints: ['Stacks Explorer', 'Development SDKs', 'API Documentation']
+    actions: ['Review available tools', 'Assess SDK capabilities', 'Evaluate development resources']
   },
   'Learn: Examples & Tutorials': {
     color: '#E8EAF6',
-    actions: ['Follow tutorials', 'Practice coding', 'Build sample projects'],
-    touchpoints: ['Tutorial Documentation', 'Sample Code', 'Learning Resources']
+    actions: ['Follow tutorials', 'Practice coding', 'Build sample projects']
   },
   'Experiment: Test Project': {
     color: '#E0F2F1',
-    actions: ['Set up development environment', 'Create test project', 'Implement basic features'],
-    touchpoints: ['Development Environment', 'Testing Framework', 'Code Editor']
+    actions: ['Set up development environment', 'Create test project', 'Implement basic features']
   },
   'Build: Project Planning': {
     color: '#FCE4EC',
-    actions: ['Create project plan', 'Define requirements', 'Set up project structure'],
-    touchpoints: ['Project Management Tools', 'Documentation', 'Planning Templates']
+    actions: ['Create project plan', 'Define requirements', 'Set up project structure']
   },
   'Build: Setup & Configuration': {
     color: '#F1F8E9',
-    actions: ['Configure development environment', 'Set up build process', 'Initialize project structure'],
-    touchpoints: ['Development Tools', 'Build Scripts', 'Configuration Files']
+    actions: ['Configure development environment', 'Set up build process', 'Initialize project structure']
   },
   'Build: Core Development': {
     color: '#E1F5FE',
-    actions: ['Implement features', 'Write tests', 'Debug and optimize'],
-    touchpoints: ['IDE', 'Testing Tools', 'Debugging Tools']
+    actions: ['Implement features', 'Write tests', 'Debug and optimize']
   },
   'Build: Validate & Iterate': {
     color: '#F3E5F5',
-    actions: ['Run tests', 'Collect feedback', 'Make improvements'],
-    touchpoints: ['Testing Framework', 'Feedback Tools', 'Version Control']
+    actions: ['Run tests', 'Collect feedback', 'Make improvements']
   },
   'Build: Launch & Monitor': {
     color: '#FFF3E0',
-    actions: ['Deploy application', 'Monitor performance', 'Address issues'],
-    touchpoints: ['Deployment Tools', 'Monitoring Systems', 'Analytics']
+    actions: ['Deploy application', 'Monitor performance', 'Address issues']
   },
   'Market & Generate Support': {
     color: '#E8EAF6',
-    actions: ['Implement marketing plan', 'Engage with community', 'Provide support'],
-    touchpoints: ['Marketing Platforms', 'Community Tools', 'Support Systems']
+    actions: ['Implement marketing plan', 'Engage with community', 'Provide support']
   },
   'Scale & Grow': {
     color: '#E0F2F1',
-    actions: ['Monitor metrics', 'Optimize performance', 'Scale infrastructure'],
-    touchpoints: ['Analytics Tools', 'Scaling Solutions', 'Monitoring Systems']
+    actions: ['Monitor metrics', 'Optimize performance', 'Scale infrastructure']
   }
 };
 
@@ -319,12 +307,12 @@ export function groupIssuesByStage(issues: GitHubIssue[], stageField: StageField
     const stageName = option.name;
     const metadata = defaultStageMetadata[stageName] || {
       color: '#E8F5E9',
-      actions: [],
-      touchpoints: []
+      actions: []
     };
 
     stageMap.set(stageName, {
       title: stageName,
+      description: option.description || '',
       color: metadata.color,
       stage: [], // This could be populated from a separate field if needed
       actions: metadata.actions,
@@ -341,6 +329,20 @@ export function groupIssuesByStage(issues: GitHubIssue[], stageField: StageField
 
       const fieldValues = projectItem.fieldValues.nodes;
       if (!fieldValues || fieldValues.length === 0) return;
+
+      // Find the Category field value
+      const categoryFieldValue = fieldValues.find(
+        (field: any) => field.field?.name === 'Category'
+      );
+      
+      // Debug logging for Category field
+      console.log(`Issue ${issue.number} Category field:`, categoryFieldValue);
+      
+      // Only process issues with Category = "Pain Point"
+      if (!categoryFieldValue || categoryFieldValue.optionId !== 'd68c4b4b') {
+        console.log(`Skipping issue ${issue.number} - Category is not "Pain Point"`);
+        return;
+      }
 
       // Find the Developer Journey Stage field
       const stageFieldValue = fieldValues.find(

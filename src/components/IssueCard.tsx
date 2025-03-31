@@ -1,3 +1,4 @@
+import React from 'react';
 import styled from 'styled-components';
 import { Tag } from './Tag';
 import { getIconForTouchpoint } from '../utils/touchpointIcons';
@@ -11,17 +12,22 @@ const Card = styled.a`
   background-color: white;
   text-decoration: none;
   color: inherit;
-  transition: box-shadow 0.2s ease-in-out;
 
   &:hover {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+    h3 {
+      text-decoration: underline;
+    }
   }
 `;
 
 const Title = styled.h3`
   margin: 0 0 0.5rem 0;
-  font-size: 1.1rem;
+  font-size: 1rem;
+  font-weight: 600;
   color: #24292e;
+  line-height: 130%;
 `;
 
 const LabelContainer = styled.div`
