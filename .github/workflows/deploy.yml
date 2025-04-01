@@ -37,13 +37,15 @@ jobs:
 
       - name: Create .env file
         run: |
-          echo "REACT_APP_GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}" > .env
+          echo "REACT_APP_GITHUB_TOKEN=${{ secrets.REACT_APP_GITHUB_TOKEN }}" > .env
           echo "REACT_APP_GITHUB_OWNER=hirosystems" >> .env
           echo "REACT_APP_GITHUB_REPO=hiro-experience-map" >> .env
           echo "REACT_APP_GITHUB_PROJECT_NUMBER=58" >> .env
 
       - name: Build
-        run: npm run build
+        run: |
+          npm run build || (echo "Build failed" && exit 1)
+          ls -la build/
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
