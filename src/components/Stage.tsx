@@ -1,7 +1,7 @@
 import { Tag } from "./Tag";
 import IssueCard from "./IssueCard";
 import styled from "styled-components";
-import { Info, Plus, Minus } from "@phosphor-icons/react";
+import { Info, Plus, Minus, Binoculars } from "@phosphor-icons/react";
 import { StageData } from "../types";
 import { useRef, useEffect, useState } from "react";
 import { getIconForTouchpoint } from "../utils/touchpointIcons";
@@ -12,7 +12,7 @@ const StageWrapper = styled.div`
   flex-direction: column;
   background: white;
   height: 100vh;
-  width: 375px;
+  width: 400px;
   flex-shrink: 0;
   overflow-y: auto;
 
@@ -83,6 +83,17 @@ const SectionTitle = styled.div`
   color: rgb(144, 144, 144);
   font-size: 12px;
   font-weight: 500;
+  gap: 8px;
+`;
+
+const Counter = styled.div<{ $count: number }>`
+  background-color: ${props => props.$count === 0 ? 'rgb(230, 230, 230)' : 'rgb(241, 90, 107)'};
+  color: ${props => props.$count === 0 ? 'rgb(144, 144, 144)' : 'white'};
+  font-size: 12px;
+  font-family: monospace;
+  padding: 4px 8px;
+  border-radius: 50px;
+  font-weight: 500;
 `;
 
 const List = styled.ul`
@@ -145,7 +156,7 @@ const ToggleIcon = styled.button`
 interface StageProps extends Omit<StageData, "stage"> {
   $headerHeight?: number;
   onHeaderHeightChange?: (height: number) => void;
-  activeTag: string | null;
+  activeTags: string[];
   onTagClick: (tag: string) => void;
 }
 
@@ -158,7 +169,7 @@ export function Stage({
   painPoints,
   $headerHeight,
   onHeaderHeightChange,
-  activeTag,
+  activeTags,
   onTagClick,
 }: StageProps) {
   const headerRef = useRef<HTMLDivElement>(null);
@@ -170,9 +181,11 @@ export function Stage({
     }
   }, [onHeaderHeightChange, title, description, isExpanded]);
 
-  // Filter pain points based on active tag
-  const filteredPainPoints = activeTag
-    ? painPoints.filter(point => point.labels?.includes(activeTag))
+  // Filter pain points based on active tags
+  const filteredPainPoints = activeTags.length > 0
+    ? painPoints.filter(point => 
+        activeTags.every(tag => point.labels?.includes(tag))
+      )
     : painPoints;
 
   return (
@@ -217,7 +230,7 @@ export function Stage({
                 key={index}
                 text={touchpoint}
                 icon={getIconForTouchpoint(touchpoint)}
-                isActive={activeTag === touchpoint}
+                isActive={activeTags.includes(touchpoint)}
                 onClick={() => onTagClick(touchpoint)}
               />
             ))}
@@ -225,7 +238,10 @@ export function Stage({
         </Section>
 
         <Section>
-          <SectionTitle>Pain Points</SectionTitle>
+          <SectionTitle>
+            Pain Points
+            <Counter $count={filteredPainPoints.length}>{filteredPainPoints.length}</Counter>
+          </SectionTitle>
           {filteredPainPoints.map((point, index) => (
             <IssueCard
               key={index}
@@ -233,7 +249,7 @@ export function Stage({
               url={point.url}
               labels={point.labels}
               tagVariant="pill"
-              activeTag={activeTag}
+              activeTags={activeTags}
               onTagClick={onTagClick}
             />
           ))}

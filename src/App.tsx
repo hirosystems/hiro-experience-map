@@ -29,7 +29,7 @@ export function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [headerHeight, setHeaderHeight] = useState(0);
-  const [activeTag, setActiveTag] = useState<string | null>(null);
+  const [activeTags, setActiveTags] = useState<string[]>([]);
 
   useEffect(() => {
     async function loadIssues() {
@@ -51,8 +51,28 @@ export function App() {
     loadIssues();
   }, []);
 
+  // Handle ESC key to clear active tags
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setActiveTags([]);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const handleTagClick = (tag: string) => {
-    setActiveTag(prev => prev === tag ? null : tag);
+    setActiveTags(prev => {
+      if (prev.includes(tag)) {
+        // Remove tag if already active
+        return prev.filter(t => t !== tag);
+      } else {
+        // Add tag if not active
+        return [...prev, tag];
+      }
+    });
   };
 
   if (loading) {
@@ -78,7 +98,7 @@ export function App() {
             onHeaderHeightChange={(height: number) => {
               setHeaderHeight(prev => Math.max(prev, height));
             }}
-            activeTag={activeTag}
+            activeTags={activeTags}
             onTagClick={handleTagClick}
           />
         ))}

@@ -42,7 +42,7 @@ interface IssueCardProps {
   url: string;
   labels?: string[];
   tagVariant?: 'default' | 'pill';
-  activeTag: string | null;
+  activeTags: string[];
   onTagClick: (tag: string) => void;
 }
 
@@ -51,7 +51,7 @@ const IssueCard: React.FC<IssueCardProps> = ({
   url, 
   labels = [], 
   tagVariant,
-  activeTag,
+  activeTags,
   onTagClick
 }) => {
   const handleTagClick = (label: string) => (e: React.MouseEvent) => {
@@ -71,7 +71,7 @@ const IssueCard: React.FC<IssueCardProps> = ({
               text={label}
               icon={getIconForTouchpoint(label)}
               variant={tagVariant}
-              isActive={activeTag === label}
+              isActive={activeTags.includes(label)}
               onClick={handleTagClick(label)}
             />
           ))}
