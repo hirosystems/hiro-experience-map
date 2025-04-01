@@ -1,4 +1,4 @@
-import { StageData, StageMetadata } from '../types';
+import { StageData } from '../types';
 import { stageMetadata } from '../data/stageMetadata';
 
 interface GitHubIssue {

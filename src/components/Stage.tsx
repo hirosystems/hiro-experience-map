@@ -1,7 +1,7 @@
 import { Tag } from "./Tag";
 import IssueCard from "./IssueCard";
 import styled from "styled-components";
-import { Info, Plus, Minus, Binoculars } from "@phosphor-icons/react";
+import { Plus, Minus } from "@phosphor-icons/react";
 import { StageData } from "../types";
 import { useRef, useEffect, useState } from "react";
 import { getIconForTouchpoint } from "../utils/touchpointIcons";
