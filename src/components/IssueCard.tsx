@@ -14,7 +14,7 @@ const Card = styled.a`
   color: inherit;
 
   &:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color:rgb(199, 199, 199);
 
     h3 {
       text-decoration: underline;
@@ -24,7 +24,7 @@ const Card = styled.a`
 
 const Title = styled.h3`
   margin: 0 0 0.5rem 0;
-  font-size: 1rem;
+  font-size: 14px;
   font-weight: 600;
   color: #24292e;
   line-height: 130%;
@@ -33,17 +33,18 @@ const Title = styled.h3`
 const LabelContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
+  gap: 6px;
+  margin-top: 8px;
 `;
 
 interface IssueCardProps {
   title: string;
   url: string;
   labels?: string[];
+  tagVariant?: 'default' | 'pill';
 }
 
-const IssueCard: React.FC<IssueCardProps> = ({ title, url, labels }) => {
+const IssueCard: React.FC<IssueCardProps> = ({ title, url, labels, tagVariant }) => {
   return (
     <Card href={url} target="_blank" rel="noopener noreferrer">
       <Title>{title}</Title>
@@ -54,6 +55,7 @@ const IssueCard: React.FC<IssueCardProps> = ({ title, url, labels }) => {
               key={index}
               text={label}
               icon={getIconForTouchpoint(label)}
+              variant={tagVariant}
             />
           ))}
         </LabelContainer>

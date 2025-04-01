@@ -18,31 +18,21 @@ import {
   Desktop, 
   DeviceMobile, 
   Globe,
-  HardDrive
+  HardDrive,
+  BookBookmark,
+  BookOpen
 } from '@phosphor-icons/react';
 
 export const getIconForTouchpoint = (touchpoint: string) => {
   const iconMap: { [key: string]: any } = {
-    'Documentation': Book,
+    'Docs': BookOpen,
     'Discord': DiscordLogo,
-    'GitHub': GithubLogo,
-    'Developer Tools': Wrench,
-    'Code Examples': Code,
-    'API Reference': FileCode,
-    'Deployment': Rocket,
     'Community': Users,
-    'Analytics': ChartLine,
     'Infrastructure': HardDrive,
     'Database': Database,
-    'Security': Shield,
-    'Support': Question,
-    'Resources': Bookmark,
-    'Integration': Link,
-    'Configuration': Gear,
-    'CLI': Terminal,
-    'Desktop App': Desktop,
-    'Mobile App': DeviceMobile,
-    'Web App': Globe
+    'Clarinet': Terminal,
+    'Platform': Desktop,
+    'Hiro.so': Globe
   };
 
   // Try to find an exact match

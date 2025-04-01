@@ -2,47 +2,23 @@ import { Tag } from "./Tag";
 import IssueCard from "./IssueCard";
 import styled from "styled-components";
 import {
-  Gear,
-  Browser,
-  Terminal,
-  Database,
-  Code,
-  Globe,
-  ChartLine,
-  Icon,
-  Users,
   Info,
+  Plus,
+  Minus,
 } from "@phosphor-icons/react";
 import { StageData } from "../types";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { getIconForTouchpoint } from "../utils/touchpointIcons";
 
 const StageWrapper = styled.div`
+  border-right: 1px solid rgb(234, 234, 234);
   display: flex;
   flex-direction: column;
   background: white;
-  border-right: 1px solid #eee;
-  height: 100%;
-  min-width: 375px;
-  overflow: hidden;
-`;
-
-const Header = styled.div<{ $backgroundColor: string; $headerHeight?: number }>`
-  padding: 1rem;
-  border-bottom: 1px solid #eee;
-  background-color: ${(props) => props.$backgroundColor};
-  border-right: 1px solid #eee;
+  height: 100vh;
+  width: 375px;
   flex-shrink: 0;
-  position: sticky;
-  top: 0;
-  z-index: 1;
-`;
-
-const Content = styled.div`
-  flex: 1;
   overflow-y: auto;
-  display: flex;
-  flex-direction: column;
 
   /* Hide scrollbar for Chrome, Safari and Opera */
   &::-webkit-scrollbar {
@@ -54,56 +30,74 @@ const Content = styled.div`
   scrollbar-width: none;  /* Firefox */
 `;
 
+const Header = styled.div<{ $backgroundColor: string; $headerHeight?: number }>`
+  padding: 1rem;
+  background-color: ${(props) => props.$backgroundColor};
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+`;
+
+const Content = styled.div`
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+  flex: 1;
+`;
+
 const Title = styled.h2`
   margin: 0;
-  font-size: 1.2rem;
+  font-size: 18px;
+  font-weight: 600;
   line-height: 1.3;
   white-space: normal;
 `;
 
-const Description = styled.p`
-  margin: 0.25rem 0 0;
-  font-size: 0.9rem;
-  color: rgba(0, 0, 0, 0.7);
-  white-space: normal;
-  line-height: 1.5;
-`;
-
 const Section = styled.div`
   padding: 1rem;
-  border-bottom: 1px solid #eee;
   background: white;
-  flex-shrink: 0;
+  border-bottom: 1px solid rgb(234, 234, 234);
+  display: flex;
+  flex-direction: column;
+
+  &:first-child {
+    min-height: 230px;
+  }
+
+  &:nth-child(2) {
+    min-height: 180px;
+  }
 
   &:last-child {
-    border-bottom: none;
     background: #f8f9fa;
     flex: 1;
-    display: flex;
-    flex-direction: column;
   }
 
   /* Add some spacing between cards in the pain points section */
   > * + * {
-    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
   }
 `;
 
 const SectionTitle = styled.div`
   display: flex;
   align-items: center;
-  margin-bottom: 0.75rem;
-  color: #666;
-  font-size: 0.9rem;
+  margin-bottom: 16px;
+  color:rgb(144, 144, 144);
+  font-size: 12px;
   font-weight: 500;
 `;
 
 const List = styled.ul`
   margin: 0;
-  padding-left: 1.5rem;
+  padding-left: 1rem;
+  flex: 1;
+  min-height: 0;
 
   li {
-    margin-bottom: 0.5rem;
+    line-height: 1.3;
+    margin-bottom: 6px;
     color: #333;
 
     &:last-child {
@@ -115,50 +109,40 @@ const List = styled.ul`
 const TagContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
-  margin: -4px;
-  padding: 4px;
+  gap: 6px;
 `;
 
 const TitleContainer = styled.div`
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 0.5rem;
 `;
 
-const InfoIcon = styled(Info)`
-  cursor: help;
+const Description = styled.div<{ $isExpanded: boolean }>`
+  margin-top: ${props => props.$isExpanded ? '1rem' : '0'};
+  max-height: ${props => props.$isExpanded ? '200px' : '0'};
+  opacity: ${props => props.$isExpanded ? '1' : '0'};
+  overflow: hidden;
+  transition: all 0.3s ease;
+  color: rgba(0, 0, 0, 0.7);
+  font-size: 14px;
+  line-height: 1.5;
+`;
+
+const ToggleIcon = styled.button`
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: rgba(0, 0, 0, 0.5);
   transition: color 0.2s;
 
   &:hover {
     color: rgba(0, 0, 0, 0.8);
-  }
-`;
-
-const Tooltip = styled.div`
-  position: absolute;
-  background: white;
-  border: 1px solid #eee;
-  border-radius: 4px;
-  padding: 0.5rem;
-  font-size: 0.9rem;
-  color: rgba(0, 0, 0, 0.7);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
-  max-width: 300px;
-  white-space: normal;
-  line-height: 1.5;
-  display: none;
-  top: 100%;
-  left: 0;
-  margin-top: 0.5rem;
-`;
-
-const InfoContainer = styled.div`
-  position: relative;
-
-  &:hover ${Tooltip} {
-    display: block;
   }
 `;
 
@@ -178,12 +162,13 @@ export function Stage({
   onHeaderHeightChange,
 }: StageProps) {
   const headerRef = useRef<HTMLDivElement>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     if (headerRef.current && onHeaderHeightChange) {
       onHeaderHeightChange(headerRef.current.offsetHeight);
     }
-  }, [onHeaderHeightChange, title, description]);
+  }, [onHeaderHeightChange, title, description, isExpanded]);
 
   return (
     <StageWrapper>
@@ -195,17 +180,21 @@ export function Stage({
         <TitleContainer>
           <Title>{title}</Title>
           {description && (
-            <InfoContainer>
-              <InfoIcon size={16} weight="bold" />
-              <Tooltip>{description}</Tooltip>
-            </InfoContainer>
+            <ToggleIcon onClick={() => setIsExpanded(!isExpanded)}>
+              {isExpanded ? <Minus size={16} weight="bold" /> : <Plus size={16} weight="bold" />}
+            </ToggleIcon>
           )}
         </TitleContainer>
+        {description && (
+          <Description $isExpanded={isExpanded}>
+            {description}
+          </Description>
+        )}
       </Header>
 
       <Content>
         <Section>
-          <SectionTitle>Actions</SectionTitle>
+          <SectionTitle>Activities</SectionTitle>
           <List>
             {actions.map((item, index) => (
               <li key={index}>{item}</li>
@@ -230,6 +219,7 @@ export function Stage({
               title={painPoint.title}
               url={painPoint.url}
               labels={painPoint.labels}
+              tagVariant="pill"
             />
           ))}
         </Section>

@@ -1,32 +1,33 @@
 import styled from 'styled-components';
 import { IconProps } from '@phosphor-icons/react';
 
-const TagWrapper = styled.div`
-  display: inline-flex;
+const TagWrapper = styled.div<{ $variant?: 'default' | 'pill' }>`
+  display: flex;
   align-items: center;
-  background-color: #f5f5f5;
-  border-radius: 6px;
+  background-color:rgb(239, 239, 239);
+  border-radius: ${props => props.$variant === 'pill' ? '50px' : '4px'};
   padding: 4px 8px;
-  margin: 0 4px 4px 0;
-  font-size: 0.875rem;
+  font-size: 12px;
+  font-weight: 400;
   color: #666;
 `;
 
 const IconWrapper = styled.span`
   display: inline-flex;
   align-items: center;
-  margin-right: 6px;
+  margin-right: 4px;
   color: #888;
 `;
 
 interface TagProps {
   text: string;
   icon: React.ForwardRefExoticComponent<IconProps>;
+  variant?: 'default' | 'pill';
 }
 
-export function Tag({ text, icon: Icon }: TagProps) {
+export function Tag({ text, icon: Icon, variant = 'default' }: TagProps) {
   return (
-    <TagWrapper>
+    <TagWrapper $variant={variant}>
       <IconWrapper>
         <Icon size={16} />
       </IconWrapper>

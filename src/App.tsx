@@ -10,6 +10,7 @@ const AppWrapper = styled.div`
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  background-color:rgb(235, 235, 235);
 `;
 
 interface StagesGridProps {
@@ -20,6 +21,7 @@ const StagesGrid = styled.div<StagesGridProps>`
   flex: 1;
   display: flex;
   overflow-x: auto;
+  height: 100%;
 `;
 
 export function App() {

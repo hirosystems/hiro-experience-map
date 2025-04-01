@@ -22,4 +22,9 @@ export interface PainPoint {
   url: string;
   status?: string;
   labels?: string[];
+}
+
+export interface StageMetadata {
+  color: string;
+  actions: string[];
 } 

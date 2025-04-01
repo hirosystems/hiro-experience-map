@@ -1,4 +1,5 @@
-import { StageData } from '../types';
+import { StageData, StageMetadata } from '../types';
+import { stageMetadata } from '../data/stageMetadata';
 
 interface GitHubIssue {
   number: number;
@@ -166,67 +167,6 @@ interface StageField {
   }>;
 }
 
-interface StageMetadata {
-  color: string;
-  actions: string[];
-}
-
-// Default metadata for stages if not found in GitHub
-const defaultStageMetadata: Record<string, StageMetadata> = {
-  'Discovery': {
-    color: '#E8F5E9',
-    actions: ['Initial research', 'Explore documentation', 'Join community']
-  },
-  'Research: Stacks & Hiro': {
-    color: '#E3F2FD',
-    actions: ['Review documentation', 'Explore example projects', 'Understand architecture']
-  },
-  'Evaluate: The Stacks Ecosystem': {
-    color: '#F3E5F5',
-    actions: ['Evaluate API endpoints', 'Research integration options', 'Review partner solutions']
-  },
-  'Evaluate: Tooling & Resources': {
-    color: '#FFF3E0',
-    actions: ['Review available tools', 'Assess SDK capabilities', 'Evaluate development resources']
-  },
-  'Learn: Examples & Tutorials': {
-    color: '#E8EAF6',
-    actions: ['Follow tutorials', 'Practice coding', 'Build sample projects']
-  },
-  'Experiment: Test Project': {
-    color: '#E0F2F1',
-    actions: ['Set up development environment', 'Create test project', 'Implement basic features']
-  },
-  'Build: Project Planning': {
-    color: '#FCE4EC',
-    actions: ['Create project plan', 'Define requirements', 'Set up project structure']
-  },
-  'Build: Setup & Configuration': {
-    color: '#F1F8E9',
-    actions: ['Configure development environment', 'Set up build process', 'Initialize project structure']
-  },
-  'Build: Core Development': {
-    color: '#E1F5FE',
-    actions: ['Implement features', 'Write tests', 'Debug and optimize']
-  },
-  'Build: Validate & Iterate': {
-    color: '#F3E5F5',
-    actions: ['Run tests', 'Collect feedback', 'Make improvements']
-  },
-  'Build: Launch & Monitor': {
-    color: '#FFF3E0',
-    actions: ['Deploy application', 'Monitor performance', 'Address issues']
-  },
-  'Market & Generate Support': {
-    color: '#E8EAF6',
-    actions: ['Implement marketing plan', 'Engage with community', 'Provide support']
-  },
-  'Scale & Grow': {
-    color: '#E0F2F1',
-    actions: ['Monitor metrics', 'Optimize performance', 'Scale infrastructure']
-  }
-};
-
 export async function fetchIssues(owner: string, repo: string, projectNumber: number): Promise<{
   issues: GitHubIssue[];
   stageField: StageField | null;
@@ -305,8 +245,8 @@ export function groupIssuesByStage(issues: GitHubIssue[], stageField: StageField
   // Initialize stages from GitHub options
   stageField.options.forEach(option => {
     const stageName = option.name;
-    const metadata = defaultStageMetadata[stageName] || {
-      color: '#E8F5E9',
+    const metadata = stageMetadata[stageName] || {
+      color: '#E1E4E8',
       actions: []
     };
 
