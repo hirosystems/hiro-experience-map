@@ -1,11 +1,7 @@
 import { Tag } from "./Tag";
 import IssueCard from "./IssueCard";
 import styled from "styled-components";
-import {
-  Info,
-  Plus,
-  Minus,
-} from "@phosphor-icons/react";
+import { Info, Plus, Minus } from "@phosphor-icons/react";
 import { StageData } from "../types";
 import { useRef, useEffect, useState } from "react";
 import { getIconForTouchpoint } from "../utils/touchpointIcons";
@@ -26,8 +22,8 @@ const StageWrapper = styled.div`
   }
 
   /* Hide scrollbar for IE, Edge and Firefox */
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 `;
 
 const Header = styled.div<{ $backgroundColor: string; $headerHeight?: number }>`
@@ -66,7 +62,7 @@ const Section = styled.div`
   }
 
   &:nth-child(2) {
-    min-height: 180px;
+    min-height: 225px;
   }
 
   &:last-child {
@@ -84,7 +80,7 @@ const SectionTitle = styled.div`
   display: flex;
   align-items: center;
   margin-bottom: 16px;
-  color:rgb(144, 144, 144);
+  color: rgb(144, 144, 144);
   font-size: 12px;
   font-weight: 500;
 `;
@@ -120,9 +116,9 @@ const TitleContainer = styled.div`
 `;
 
 const Description = styled.div<{ $isExpanded: boolean }>`
-  margin-top: ${props => props.$isExpanded ? '1rem' : '0'};
-  max-height: ${props => props.$isExpanded ? '200px' : '0'};
-  opacity: ${props => props.$isExpanded ? '1' : '0'};
+  margin-top: ${(props) => (props.$isExpanded ? "1rem" : "0")};
+  max-height: ${(props) => (props.$isExpanded ? "200px" : "0")};
+  opacity: ${(props) => (props.$isExpanded ? "1" : "0")};
   overflow: hidden;
   transition: all 0.3s ease;
   color: rgba(0, 0, 0, 0.7);
@@ -181,14 +177,16 @@ export function Stage({
           <Title>{title}</Title>
           {description && (
             <ToggleIcon onClick={() => setIsExpanded(!isExpanded)}>
-              {isExpanded ? <Minus size={16} weight="bold" /> : <Plus size={16} weight="bold" />}
+              {isExpanded ? (
+                <Minus size={16} weight="bold" />
+              ) : (
+                <Plus size={16} weight="bold" />
+              )}
             </ToggleIcon>
           )}
         </TitleContainer>
         {description && (
-          <Description $isExpanded={isExpanded}>
-            {description}
-          </Description>
+          <Description $isExpanded={isExpanded}>{description}</Description>
         )}
       </Header>
 
@@ -206,7 +204,12 @@ export function Stage({
           <SectionTitle>Touchpoints</SectionTitle>
           <TagContainer>
             {touchpoints.map((item, index) => (
-              <Tag key={index} text={item} icon={getIconForTouchpoint(item)} />
+              <Tag
+                key={index}
+                text={item}
+                variant="pill"
+                icon={getIconForTouchpoint(item)}
+              />
             ))}
           </TagContainer>
         </Section>

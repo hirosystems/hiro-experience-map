@@ -1,6 +1,7 @@
 import { 
   Book, 
-  DiscordLogo, 
+  DiscordLogo,
+  Drop, 
   GithubLogo, 
   Wrench, 
   Code, 
@@ -20,19 +21,70 @@ import {
   Globe,
   HardDrive,
   BookBookmark,
-  BookOpen
+  BookOpen,
+  UsersThree,
+  Newspaper,
+  MagnifyingGlass,
+  TestTube,
+  CodeSimple,
+  GearFine,
+  Bug,
+  ChartBar,
+  Bell,
+  ChatCircle,
+  Handshake,
+  PresentationChart,
+  Monitor,
+  PuzzlePiece,
+  MapTrifold,
+  FileJs,
+  Eye,
+  Lifebuoy,
+  TwitterLogo,
+  AppWindow,
 } from '@phosphor-icons/react';
 
 export const getIconForTouchpoint = (touchpoint: string) => {
   const iconMap: { [key: string]: any } = {
-    'Docs': BookOpen,
-    'Discord': DiscordLogo,
+    // Social & Community
+    'Social': TwitterLogo,
+    'Events & Hackathons': Users,
+    'Blog': Newspaper,
     'Community': Users,
-    'Infrastructure': HardDrive,
-    'Database': Database,
+    'Support': Lifebuoy,
+
+    // Documentation & Resources
+    'Docs': BookOpen,
+    'Hiro.so': Globe,
+    'Stacks.co': Globe,
+    'Platform': AppWindow,
+    'Templates': PuzzlePiece,
+    'Primitives': PuzzlePiece,
+    'Examples & Guides': MapTrifold,
+
+    // Development Tools
     'Clarinet': Terminal,
-    'Platform': Desktop,
-    'Hiro.so': Globe
+    'Clarity': FileJs,
+    'VSCode Extension': Code,
+    'Stacks JS': FileJs,
+    'Stacks Connect': PuzzlePiece,
+    'APIs': Database,
+    'Chainhooks': Bell,
+
+    // Testing & Deployment
+    'Clarity Playground': TestTube,
+    'Explorer': MagnifyingGlass,
+    'Explorer Sandbox': TestTube,
+    'Testnet': Bug,
+    'Devnet': Bug,
+    'Faucet': Drop,
+    'Security': Shield,
+    'Simnet': TestTube,
+    'Simulation': TestTube,
+
+    // Monitoring & Analytics
+    'Contract Monitoring': Eye,
+    'Usage & Analytics': ChartBar,
   };
 
   // Try to find an exact match

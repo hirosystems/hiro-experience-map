@@ -247,7 +247,8 @@ export function groupIssuesByStage(issues: GitHubIssue[], stageField: StageField
     const stageName = option.name;
     const metadata = stageMetadata[stageName] || {
       color: '#E1E4E8',
-      actions: []
+      actions: [],
+      touchpoints: []
     };
 
     stageMap.set(stageName, {
@@ -256,7 +257,7 @@ export function groupIssuesByStage(issues: GitHubIssue[], stageField: StageField
       color: metadata.color,
       stage: [], // This could be populated from a separate field if needed
       actions: metadata.actions,
-      touchpoints: [], // We'll populate this from issue labels
+      touchpoints: [...(metadata.touchpoints || [])], // Initialize with metadata touchpoints, fallback to empty array
       painPoints: []
     });
   });

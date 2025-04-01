@@ -8,6 +8,7 @@ export const stageMetadata: Record<string, StageMetadata> = {
       "Participate in Hackathons",
       "Consume Stacks/Hiro content",
     ],
+    touchpoints: ["Social", "Events & Hackathons", "Blog"],
   },
   "Research: Stacks & Hiro": {
     color: "#C6FAF6",
@@ -16,6 +17,7 @@ export const stageMetadata: Record<string, StageMetadata> = {
       "Consume Stacks/Hiro content",
       "Investigate specific Stacks use cases",
     ],
+    touchpoints: ["Hiro.so", "Stacks.co", "Blog"],
   },
   "Evaluate: The Stacks Ecosystem": {
     color: "#C6FAF6",
@@ -24,6 +26,7 @@ export const stageMetadata: Record<string, StageMetadata> = {
       "Trial Live Applications on Mainnet",
       "Investigate specific Stacks use cases",
     ],
+    touchpoints: ["Social", "Hiro.so", "Stacks.co", "Blog"],
   },
   "Evaluate: Tooling & Resources": {
     color: "#C6FAF6",
@@ -32,6 +35,7 @@ export const stageMetadata: Record<string, StageMetadata> = {
       "Investigate Available Tools & Resources",
       "Evaluate the maturity of the developer experience",
     ],
+    touchpoints: ["Hiro.so", "Docs", "Platform", "Explorer"],
   },
   "Learn: Examples & Guides": {
     color: "#C2E5FF",
@@ -43,6 +47,7 @@ export const stageMetadata: Record<string, StageMetadata> = {
       "Call/test contract functions",
       "Complete Tutorials",
     ],
+    touchpoints: ["Explorer Sandbox", "Testnet"],
   },
   "Experiment: Test Project": {
     color: "#C2E5FF",
@@ -55,6 +60,17 @@ export const stageMetadata: Record<string, StageMetadata> = {
       "Test basic contract functions",
       "Deploy project to test the deployment experience",
     ],
+    touchpoints: [
+      "Docs",
+      "Clarinet",
+      "VSCode Extension",
+      "Templates",
+      "Faucet",
+      "Platform",
+      "Testnet",
+      "Devnet",
+      "APIs",
+    ],
   },
   "Build: Project Planning": {
     color: "#DCCCFF",
@@ -63,6 +79,7 @@ export const stageMetadata: Record<string, StageMetadata> = {
       "Identify necessary dependencies",
       "Identify available primitives and ready-to-use components",
     ],
+    touchpoints: ["APIs"],
   },
   "Build: Setup & Configuration": {
     color: "#DCCCFF",
@@ -71,6 +88,15 @@ export const stageMetadata: Record<string, StageMetadata> = {
       "Setup and configure essential tools and services",
       "Create new project repository",
       "Seek support when troubleshooting",
+    ],
+    touchpoints: [
+      "APIs",
+      "Chainhooks",
+      "APIs",
+      "VSCode Extension",
+      "Stacks JS",
+      "Stacks Connect",
+      "Contract Monitoring",
     ],
   },
   "Build: Core Development": {
@@ -82,6 +108,17 @@ export const stageMetadata: Record<string, StageMetadata> = {
       "Write tests",
       "Begin integrating with Hiro tools and services",
       "Seek support when troubleshooting",
+    ],
+    touchpoints: [
+      "APIs",
+      "Chainhooks",
+      "APIs",
+      "VSCode Extension",
+      "Stacks JS",
+      "Stacks Connect",
+      "Contract Monitoring",
+      "Devnet",
+      "Support",
     ],
   },
   "Build: Validate & Iterate": {
@@ -95,6 +132,14 @@ export const stageMetadata: Record<string, StageMetadata> = {
       "Diagnose and troubleshoot",
       "User Testing",
     ],
+    touchpoints: [
+      "Chainhooks",
+      "Explorer",
+      "Faucet",
+      "Testnet",
+      "Devnet",
+      "Support",
+    ],
   },
   "Build: Launch & Monitor": {
     color: "#DCCCFF",
@@ -106,6 +151,7 @@ export const stageMetadata: Record<string, StageMetadata> = {
       "Monitor performance",
       "Diagnose and troubleshoot",
     ],
+    touchpoints: ["Explorer"],
   },
   "Market & Generate Support": {
     color: "#FFC7C2",
@@ -113,6 +159,7 @@ export const stageMetadata: Record<string, StageMetadata> = {
       "Initial marketing across social channels",
       "Initial fundraising",
     ],
+    touchpoints: ["Social", "Events & Hackathons"],
   },
   "Scale & Grow": {
     color: "#FFE0C2",
@@ -123,5 +170,6 @@ export const stageMetadata: Record<string, StageMetadata> = {
       "Collaborative Development",
       "Continued monitoring of contract and application security, performance, and usage.",
     ],
+    touchpoints: ["Contract Monitoring", "Usage & Analytics"],
   },
 };

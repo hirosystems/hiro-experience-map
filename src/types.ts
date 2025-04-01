@@ -27,4 +27,5 @@ export interface PainPoint {
 export interface StageMetadata {
   color: string;
   actions: string[];
+  touchpoints?: string[];
 } 
