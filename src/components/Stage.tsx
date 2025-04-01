@@ -145,6 +145,8 @@ const ToggleIcon = styled.button`
 interface StageProps extends Omit<StageData, "stage"> {
   $headerHeight?: number;
   onHeaderHeightChange?: (height: number) => void;
+  activeTag: string | null;
+  onTagClick: (tag: string) => void;
 }
 
 export function Stage({
@@ -156,6 +158,8 @@ export function Stage({
   painPoints,
   $headerHeight,
   onHeaderHeightChange,
+  activeTag,
+  onTagClick,
 }: StageProps) {
   const headerRef = useRef<HTMLDivElement>(null);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -165,6 +169,11 @@ export function Stage({
       onHeaderHeightChange(headerRef.current.offsetHeight);
     }
   }, [onHeaderHeightChange, title, description, isExpanded]);
+
+  // Filter pain points based on active tag
+  const filteredPainPoints = activeTag
+    ? painPoints.filter(point => point.labels?.includes(activeTag))
+    : painPoints;
 
   return (
     <StageWrapper>
@@ -203,12 +212,13 @@ export function Stage({
         <Section>
           <SectionTitle>Touchpoints</SectionTitle>
           <TagContainer>
-            {touchpoints.map((item, index) => (
+            {touchpoints.map((touchpoint, index) => (
               <Tag
                 key={index}
-                text={item}
-                variant="pill"
-                icon={getIconForTouchpoint(item)}
+                text={touchpoint}
+                icon={getIconForTouchpoint(touchpoint)}
+                isActive={activeTag === touchpoint}
+                onClick={() => onTagClick(touchpoint)}
               />
             ))}
           </TagContainer>
@@ -216,13 +226,15 @@ export function Stage({
 
         <Section>
           <SectionTitle>Pain Points</SectionTitle>
-          {painPoints.map((painPoint, index) => (
+          {filteredPainPoints.map((point, index) => (
             <IssueCard
               key={index}
-              title={painPoint.title}
-              url={painPoint.url}
-              labels={painPoint.labels}
+              title={point.title}
+              url={point.url}
+              labels={point.labels}
               tagVariant="pill"
+              activeTag={activeTag}
+              onTagClick={onTagClick}
             />
           ))}
         </Section>

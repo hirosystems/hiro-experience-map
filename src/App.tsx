@@ -29,6 +29,7 @@ export function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [headerHeight, setHeaderHeight] = useState(0);
+  const [activeTag, setActiveTag] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadIssues() {
@@ -49,6 +50,10 @@ export function App() {
 
     loadIssues();
   }, []);
+
+  const handleTagClick = (tag: string) => {
+    setActiveTag(prev => prev === tag ? null : tag);
+  };
 
   if (loading) {
     return <div>Loading...</div>;
@@ -73,6 +78,8 @@ export function App() {
             onHeaderHeightChange={(height: number) => {
               setHeaderHeight(prev => Math.max(prev, height));
             }}
+            activeTag={activeTag}
+            onTagClick={handleTagClick}
           />
         ))}
       </StagesGrid>

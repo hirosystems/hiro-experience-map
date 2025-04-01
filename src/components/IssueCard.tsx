@@ -42,13 +42,28 @@ interface IssueCardProps {
   url: string;
   labels?: string[];
   tagVariant?: 'default' | 'pill';
+  activeTag: string | null;
+  onTagClick: (tag: string) => void;
 }
 
-const IssueCard: React.FC<IssueCardProps> = ({ title, url, labels, tagVariant }) => {
+const IssueCard: React.FC<IssueCardProps> = ({ 
+  title, 
+  url, 
+  labels = [], 
+  tagVariant,
+  activeTag,
+  onTagClick
+}) => {
+  const handleTagClick = (label: string) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onTagClick(label);
+  };
+
   return (
     <Card href={url} target="_blank" rel="noopener noreferrer">
       <Title>{title}</Title>
-      {labels && labels.length > 0 && (
+      {labels.length > 0 && (
         <LabelContainer>
           {labels.map((label, index) => (
             <Tag 
@@ -56,6 +71,8 @@ const IssueCard: React.FC<IssueCardProps> = ({ title, url, labels, tagVariant })
               text={label}
               icon={getIconForTouchpoint(label)}
               variant={tagVariant}
+              isActive={activeTag === label}
+              onClick={handleTagClick(label)}
             />
           ))}
         </LabelContainer>
