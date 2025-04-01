@@ -37,51 +37,201 @@ interface GitHubIssue {
   body?: string;
 }
 
-// Static data that will be included in the build
-const staticData = {
-  data: {
-    repository: {
-      id: "1",
-      name: "hiro-experience-map",
-      projectsV2: {
-        nodes: [{
-          number: 58,
-          title: "Experience Map",
-          items: {
-            nodes: []
+interface ProjectNode {
+  number: number;
+  title: string;
+}
+
+const PROJECT_QUERY = `
+  query($owner: String!, $repo: String!, $projectNumber: Int!) {
+    repository(owner: $owner, name: $repo) {
+      id
+      name
+      projectsV2(first: 10) {
+        nodes {
+          number
+          title
+        }
+      }
+      projectV2(number: $projectNumber) {
+        id
+        title
+        fields(first: 20) {
+          nodes {
+            ... on ProjectV2Field {
+              name
+              dataType
+            }
+            ... on ProjectV2SingleSelectField {
+              name
+              dataType
+              options {
+                id
+                name
+                description
+              }
+            }
+            ... on ProjectV2FieldCommon {
+              name
+              dataType
+            }
           }
-        }]
+        }
+        items(first: 100) {
+          nodes {
+            content {
+              ... on Issue {
+                number
+                title
+                url
+                state
+                labels(first: 10) {
+                  nodes {
+                    name
+                    color
+                  }
+                }
+                projectItems(first: 1) {
+                  nodes {
+                    fieldValues(first: 10) {
+                      nodes {
+                        ... on ProjectV2ItemFieldTextValue {
+                          field {
+                            ... on ProjectV2Field {
+                              name
+                              dataType
+                            }
+                          }
+                          text
+                        }
+                        ... on ProjectV2ItemFieldSingleSelectValue {
+                          field {
+                            ... on ProjectV2SingleSelectField {
+                              name
+                              dataType
+                              options {
+                                id
+                                name
+                              }
+                            }
+                          }
+                          optionId
+                        }
+                        ... on ProjectV2ItemFieldNumberValue {
+                          field {
+                            ... on ProjectV2Field {
+                              name
+                              dataType
+                            }
+                          }
+                          number
+                        }
+                        ... on ProjectV2ItemFieldDateValue {
+                          field {
+                            ... on ProjectV2Field {
+                              name
+                              dataType
+                            }
+                          }
+                          date
+                        }
+                        ... on ProjectV2ItemFieldIterationValue {
+                          field {
+                            ... on ProjectV2Field {
+                              name
+                              dataType
+                            }
+                          }
+                          iterationId
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
   }
-};
+`;
 
-export const getProjectData = async (): Promise<StageData[]> => {
-  // Use static data instead of making API calls
-  const project = staticData.data.repository.projectsV2.nodes[0];
-  const issues = project.items.nodes
-    .map((item: any) => item.content)
-    .filter((content: any) => content !== null) as GitHubIssue[];
+interface StageField {
+  name: string;
+  dataType: string;
+  options?: Array<{
+    id: string;
+    name: string;
+    description?: string;
+  }>;
+}
 
-  return Object.entries(stageMetadata).map(([stageName, metadata]) => ({
-    title: stageName,
-    description: '', // Add descriptions if needed
-    color: metadata.color,
-    stage: [stageName],
-    actions: metadata.actions,
-    touchpoints: metadata.touchpoints || [],
-    painPoints: issues
-      .filter((issue) => issue.labels.nodes.some((label) => label.name === stageName))
-      .map((issue) => ({
-        title: issue.title,
-        description: issue.body || '',
-        issueNumber: issue.number,
-        url: issue.url,
-        status: issue.state,
-        labels: issue.labels.nodes.map(label => label.name)
-      }))
-  }));
-};
+export async function fetchIssues(owner: string, repo: string, projectNumber: number): Promise<{
+  issues: GitHubIssue[];
+  stageField: StageField | null;
+}> {
+  const token = process.env.REACT_APP_GITHUB_TOKEN;
+  
+  if (!token) {
+    throw new Error('GitHub token not found. Please add REACT_APP_GITHUB_TOKEN to your .env file.');
+  }
+
+  const response = await fetch('https://api.github.com/graphql', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/vnd.github.v3+json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      query: PROJECT_QUERY,
+      variables: {
+        owner,
+        repo,
+        projectNumber,
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(`Failed to fetch issues: ${errorData.message || response.statusText}`);
+  }
+
+  const data = await response.json();
+  
+  if (data.errors) {
+    throw new Error(`GraphQL Error: ${data.errors[0].message}`);
+  }
+
+  const repository = data.data?.repository;
+  if (!repository) {
+    throw new Error(`Repository ${owner}/${repo} not found or no access to repository`);
+  }
+
+  const project = repository.projectV2;
+  if (!project) {
+    const availableProjects = repository.projectsV2?.nodes || [];
+    const projectList = availableProjects
+      .filter((p: ProjectNode | null): p is ProjectNode => p !== null)
+      .map((p: ProjectNode) => `${p.number}: ${p.title}`)
+      .join(', ');
+    throw new Error(`Project ${projectNumber} not found or no access to project. Available projects: ${projectList}`);
+  }
+
+  const items = project.items?.nodes || [];
+  const stageField = project.fields?.nodes?.find(
+    (field: StageField) => field.name === 'Developer Journey Stage'
+  ) || null;
+
+  return {
+    issues: items
+      .map((node: any) => node.content)
+      .filter((content: any): content is GitHubIssue => content !== null),
+    stageField
+  };
+}
 
 export function groupIssuesByStage(issues: GitHubIssue[], stageField: StageField | null): StageData[] {
   if (!stageField?.options) {
