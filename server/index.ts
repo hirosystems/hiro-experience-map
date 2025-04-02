@@ -1,8 +1,13 @@
-import express, { Request, Response } from 'express';
+import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { GITHUB_PROJECT_QUERY } from '../src/services/queries';
-import { GitHubResponse } from '../src/types/github';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import { GITHUB_PROJECT_QUERY } from '../src/services/queries.js';
+import { GitHubResponse } from '../src/types/github.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 dotenv.config();
 
@@ -34,12 +39,12 @@ requiredEnvVars.forEach(envVar => {
 });
 
 // Health check endpoint
-app.get('/api/health', (_req: Request, res: Response) => {
+app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
 
 // GitHub API endpoint
-app.get('/api/github-data', async (_req: Request, res: Response) => {
+app.get('/api/github-data', async (_req, res) => {
   try {
     console.log('Starting GitHub API request...');
 
