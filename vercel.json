@@ -28,7 +28,8 @@
       "src": "/static/(.*)",
       "dest": "/build/static/$1",
       "headers": {
-        "Access-Control-Allow-Origin": "*"
+        "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "no-cache"
       }
     },
     {
@@ -36,14 +37,16 @@
       "dest": "/build/manifest.json",
       "headers": {
         "Access-Control-Allow-Origin": "*",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Cache-Control": "no-cache"
       }
     },
     {
       "src": "/favicon.ico",
       "dest": "/build/favicon.ico",
       "headers": {
-        "Access-Control-Allow-Origin": "*"
+        "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "no-cache"
       }
     },
     {
@@ -51,7 +54,8 @@
       "dest": "/build/asset-manifest.json",
       "headers": {
         "Access-Control-Allow-Origin": "*",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Cache-Control": "no-cache"
       }
     },
     {
@@ -59,7 +63,8 @@
       "dest": "/build/$1.js",
       "headers": {
         "Access-Control-Allow-Origin": "*",
-        "Content-Type": "application/javascript"
+        "Content-Type": "application/javascript",
+        "Cache-Control": "no-cache"
       }
     },
     {
@@ -67,7 +72,8 @@
       "dest": "/build/index.html",
       "headers": {
         "Access-Control-Allow-Origin": "*",
-        "Content-Type": "text/html"
+        "Content-Type": "text/html",
+        "Cache-Control": "no-cache"
       }
     }
   ],
@@ -87,6 +93,7 @@
     }
   ],
   "env": {
-    "NODE_ENV": "production"
+    "NODE_ENV": "production",
+    "BUILD_TIMESTAMP": "2024-03-21T12:00:00Z"
   }
 }
