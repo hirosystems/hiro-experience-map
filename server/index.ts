@@ -33,7 +33,13 @@ app.get('/api/github-data', async (_req: Request, res: Response) => {
         'Authorization': `Bearer ${process.env.HIRO_GITHUB_TOKEN}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ query: GITHUB_PROJECT_QUERY })
+      body: JSON.stringify({ 
+        query: GITHUB_PROJECT_QUERY,
+        variables: {
+          owner: process.env.HIRO_GITHUB_OWNER,
+          projectNumber: parseInt(process.env.HIRO_GITHUB_PROJECT_NUMBER || '0', 10)
+        }
+      })
     });
 
     if (!response.ok) {

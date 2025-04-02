@@ -1,7 +1,7 @@
 export const GITHUB_PROJECT_QUERY = `
-  query {
-    organization(login: "${process.env.HIRO_GITHUB_OWNER}") {
-      projectV2(number: ${process.env.HIRO_GITHUB_PROJECT_NUMBER}) {
+  query($owner: String!, $projectNumber: Int!) {
+    organization(login: $owner) {
+      projectV2(number: $projectNumber) {
         fields(first: 20) {
           nodes {
             ... on ProjectV2Field {
