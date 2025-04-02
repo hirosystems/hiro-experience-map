@@ -23,74 +23,23 @@
     },
     {
       "src": "/static/(.*)",
-      "dest": "/build/static/$1",
-      "headers": {
-        "cache-control": "public, max-age=31536000, immutable",
-        "content-type": "application/javascript"
-      }
+      "dest": "/build/static/$1"
     },
     {
       "src": "/manifest.json",
-      "dest": "/build/manifest.json",
-      "headers": {
-        "cache-control": "public, max-age=0, must-revalidate",
-        "content-type": "application/json"
-      }
+      "dest": "/build/manifest.json"
     },
     {
       "src": "/favicon.ico",
-      "dest": "/build/favicon.ico",
-      "headers": {
-        "cache-control": "public, max-age=31536000",
-        "content-type": "image/x-icon"
-      }
+      "dest": "/build/favicon.ico"
     },
     {
       "src": "/asset-manifest.json",
-      "dest": "/build/asset-manifest.json",
-      "headers": {
-        "cache-control": "public, max-age=0, must-revalidate",
-        "content-type": "application/json"
-      }
-    },
-    {
-      "src": "/(.*)\\.js$",
-      "dest": "/build/$1.js",
-      "headers": {
-        "cache-control": "public, max-age=31536000, immutable",
-        "content-type": "application/javascript"
-      }
-    },
-    {
-      "src": "/(.*)\\.css$",
-      "dest": "/build/$1.css",
-      "headers": {
-        "cache-control": "public, max-age=31536000, immutable",
-        "content-type": "text/css"
-      }
-    },
-    {
-      "src": "/(.*)\\.(png|jpg|jpeg|gif|ico|svg)$",
-      "dest": "/build/$1.$2",
-      "headers": {
-        "cache-control": "public, max-age=31536000, immutable"
-      }
-    },
-    {
-      "src": "/(.*)\\.(woff|woff2|ttf|eot)$",
-      "dest": "/build/$1.$2",
-      "headers": {
-        "cache-control": "public, max-age=31536000, immutable",
-        "content-type": "application/font-$2"
-      }
+      "dest": "/build/asset-manifest.json"
     },
     {
       "src": "/(.*)",
-      "dest": "/build/index.html",
-      "headers": {
-        "cache-control": "public, max-age=0, must-revalidate",
-        "content-type": "text/html"
-      }
+      "dest": "/build/index.html"
     }
   ],
   "headers": [
