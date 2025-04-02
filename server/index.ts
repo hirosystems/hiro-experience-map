@@ -1,6 +1,8 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { GITHUB_PROJECT_QUERY } from '../src/services/queries';
+import { GitHubResponse } from '../src/types/github';
 
 dotenv.config();
 
@@ -22,189 +24,16 @@ requiredEnvVars.forEach(envVar => {
   }
 });
 
-interface GitHubResponse {
-  data?: {
-    organization?: {
-      projectV2?: {
-        fields?: {
-          nodes?: Array<{
-            name: string;
-            dataType: string;
-            options?: Array<{
-              id: string;
-              name: string;
-              description?: string;
-            }>;
-          }>;
-        };
-        items?: {
-          nodes?: Array<{
-            content?: {
-              id: string;
-              title: string;
-              body: string;
-              state: string;
-              createdAt: string;
-              updatedAt: string;
-              labels?: {
-                nodes: Array<{
-                  name: string;
-                  color: string;
-                }>;
-              };
-              projectItems?: {
-                nodes: Array<{
-                  fieldValues: {
-                    nodes: Array<{
-                      field: {
-                        name: string;
-                        dataType: string;
-                        options?: Array<{
-                          id: string;
-                          name: string;
-                        }>;
-                      };
-                      value?: string;
-                      text?: string;
-                      optionId?: string;
-                      number?: number;
-                      date?: string;
-                      iterationId?: string;
-                    }>;
-                  };
-                }>;
-              };
-            };
-          }>;
-        };
-      };
-    };
-  };
-  errors?: Array<{
-    message: string;
-  }>;
-}
-
 // GitHub API endpoint
 app.get('/api/github-data', async (_req: Request, res: Response) => {
   try {
-    console.log('Fetching GitHub data...');
-    console.log('Using token:', process.env.HIRO_GITHUB_TOKEN ? 'Token exists' : 'No token found');
-    console.log('Owner:', process.env.HIRO_GITHUB_OWNER);
-    console.log('Project number:', process.env.HIRO_GITHUB_PROJECT_NUMBER);
-
-    const query = `
-      query {
-        organization(login: "${process.env.HIRO_GITHUB_OWNER}") {
-          projectV2(number: ${process.env.HIRO_GITHUB_PROJECT_NUMBER}) {
-            fields(first: 20) {
-              nodes {
-                ... on ProjectV2Field {
-                  name
-                  dataType
-                }
-                ... on ProjectV2SingleSelectField {
-                  name
-                  dataType
-                  options {
-                    id
-                    name
-                    description
-                  }
-                }
-              }
-            }
-            items(first: 100) {
-              nodes {
-                content {
-                  ... on Issue {
-                    id
-                    title
-                    body
-                    state
-                    createdAt
-                    updatedAt
-                    labels(first: 10) {
-                      nodes {
-                        name
-                        color
-                      }
-                    }
-                    projectItems(first: 1) {
-                      nodes {
-                        fieldValues(first: 10) {
-                          nodes {
-                            ... on ProjectV2ItemFieldTextValue {
-                              field {
-                                ... on ProjectV2Field {
-                                  name
-                                  dataType
-                                }
-                              }
-                              text
-                            }
-                            ... on ProjectV2ItemFieldSingleSelectValue {
-                              field {
-                                ... on ProjectV2SingleSelectField {
-                                  name
-                                  dataType
-                                  options {
-                                    id
-                                    name
-                                  }
-                                }
-                              }
-                              optionId
-                            }
-                            ... on ProjectV2ItemFieldNumberValue {
-                              field {
-                                ... on ProjectV2Field {
-                                  name
-                                  dataType
-                                }
-                              }
-                              number
-                            }
-                            ... on ProjectV2ItemFieldDateValue {
-                              field {
-                                ... on ProjectV2Field {
-                                  name
-                                  dataType
-                                }
-                              }
-                              date
-                            }
-                            ... on ProjectV2ItemFieldIterationValue {
-                              field {
-                                ... on ProjectV2Field {
-                                  name
-                                  dataType
-                                }
-                              }
-                              iterationId
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    `;
-
-    console.log('GraphQL Query:', query);
-
     const response = await fetch('https://api.github.com/graphql', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${process.env.HIRO_GITHUB_TOKEN}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ query })
+      body: JSON.stringify({ query: GITHUB_PROJECT_QUERY })
     });
 
     if (!response.ok) {
@@ -218,39 +47,6 @@ app.get('/api/github-data', async (_req: Request, res: Response) => {
     if (data.errors) {
       console.error('GitHub GraphQL errors:', data.errors);
       throw new Error(`GitHub API Error: ${data.errors[0].message}`);
-    }
-
-    // Log the response structure
-    console.log('Response structure:', {
-      hasOrganization: !!data.data?.organization,
-      hasProject: !!data.data?.organization?.projectV2,
-      hasFields: !!data.data?.organization?.projectV2?.fields,
-      hasItems: !!data.data?.organization?.projectV2?.items,
-      fieldCount: data.data?.organization?.projectV2?.fields?.nodes?.length,
-      itemCount: data.data?.organization?.projectV2?.items?.nodes?.length
-    });
-
-    // Log the fields to help debug
-    if (data.data?.organization?.projectV2?.fields?.nodes) {
-      console.log('Available fields:', data.data.organization.projectV2.fields.nodes.map(f => ({
-        name: f.name,
-        dataType: f.dataType,
-        hasOptions: !!f.options,
-        optionsCount: f.options?.length
-      })));
-    }
-
-    // Log a sample item to help debug
-    if (data.data?.organization?.projectV2?.items?.nodes?.[0]?.content) {
-      const sampleItem = data.data.organization.projectV2.items.nodes[0].content;
-      console.log('Sample item:', {
-        title: sampleItem.title,
-        state: sampleItem.state,
-        hasLabels: !!sampleItem.labels,
-        labelCount: sampleItem.labels?.nodes?.length,
-        hasProjectItems: !!sampleItem.projectItems,
-        projectItemCount: sampleItem.projectItems?.nodes?.length
-      });
     }
 
     res.json(data);
