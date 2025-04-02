@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Hiro Experience Map",
+  "name": "A DeveloperExperience Map by Hiro Systems",
   "icons": [
     {
       "src": "favicon.ico",

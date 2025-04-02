@@ -171,70 +171,66 @@ export async function fetchIssues(owner: string, repo: string, projectNumber: nu
   issues: GitHubIssue[];
   stageField: StageField | null;
 }> {
-  const token = process.env.REACT_APP_GITHUB_TOKEN;
+  console.log('Fetching issues with params:', { owner, repo, projectNumber });
   
-  if (!token) {
-    throw new Error('GitHub token not found. Please add REACT_APP_GITHUB_TOKEN to your .env file.');
-  }
-
-  const response = await fetch('https://api.github.com/graphql', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/vnd.github.v3+json',
-      'Authorization': `Bearer ${token}`,
-    },
-    body: JSON.stringify({
-      query: PROJECT_QUERY,
-      variables: {
-        owner,
-        repo,
-        projectNumber,
-      },
-    }),
-  });
+  const response = await fetch('/api/github-data');
 
   if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(`Failed to fetch issues: ${errorData.message || response.statusText}`);
+    throw new Error(`Failed to fetch issues: ${response.statusText}`);
   }
 
   const data = await response.json();
+  console.log('Received GitHub data:', {
+    hasData: !!data.data,
+    hasOrganization: !!data.data?.organization,
+    hasProject: !!data.data?.organization?.projectV2,
+    hasFields: !!data.data?.organization?.projectV2?.fields,
+    hasItems: !!data.data?.organization?.projectV2?.items,
+    fieldCount: data.data?.organization?.projectV2?.fields?.nodes?.length,
+    itemCount: data.data?.organization?.projectV2?.items?.nodes?.length
+  });
   
   if (data.errors) {
+    console.error('GraphQL errors:', data.errors);
     throw new Error(`GraphQL Error: ${data.errors[0].message}`);
   }
 
-  const repository = data.data?.repository;
-  if (!repository) {
-    throw new Error(`Repository ${owner}/${repo} not found or no access to repository`);
+  const organization = data.data?.organization;
+  if (!organization) {
+    console.error('Organization not found:', owner);
+    throw new Error(`Organization ${owner} not found or no access to organization`);
   }
 
-  const project = repository.projectV2;
+  const project = organization.projectV2;
   if (!project) {
-    const availableProjects = repository.projectsV2?.nodes || [];
-    const projectList = availableProjects
-      .filter((p: ProjectNode | null): p is ProjectNode => p !== null)
-      .map((p: ProjectNode) => `${p.number}: ${p.title}`)
-      .join(', ');
-    throw new Error(`Project ${projectNumber} not found or no access to project. Available projects: ${projectList}`);
+    console.error('Project not found:', projectNumber);
+    throw new Error(`Project ${projectNumber} not found or no access to project`);
   }
 
   const items = project.items?.nodes || [];
+  console.log('Found items:', items.length);
+
   const stageField = project.fields?.nodes?.find(
     (field: StageField) => field.name === 'Developer Journey Stage'
   ) || null;
 
+  const filteredIssues = items
+    .map((node: any) => node.content)
+    .filter((content: any): content is GitHubIssue => content !== null);
+
   return {
-    issues: items
-      .map((node: any) => node.content)
-      .filter((content: any): content is GitHubIssue => content !== null),
+    issues: filteredIssues,
     stageField
   };
 }
 
 export function groupIssuesByStage(issues: GitHubIssue[], stageField: StageField | null): StageData[] {
-  if (!stageField?.options) {
+  if (!stageField) {
+    console.warn('No stage field found in GitHub project');
+    return [];
+  }
+
+  if (!stageField.options) {
     console.warn('No stage field options found in GitHub project');
     return [];
   }
@@ -248,82 +244,42 @@ export function groupIssuesByStage(issues: GitHubIssue[], stageField: StageField
     const metadata = stageMetadata[stageName] || {
       color: '#E1E4E8',
       actions: [],
-      touchpoints: []
     };
-
+    
     stageMap.set(stageName, {
       title: stageName,
       description: option.description || '',
       color: metadata.color,
-      stage: [], // This could be populated from a separate field if needed
       actions: metadata.actions,
-      touchpoints: [...(metadata.touchpoints || [])], // Initialize with metadata touchpoints, fallback to empty array
-      painPoints: []
+      touchpoints: metadata.touchpoints || [],
+      painPoints: [],
+      issues: [],
     });
   });
 
-  // Group issues by their Developer Journey Stage field value
+  // Group issues by stage
   issues.forEach(issue => {
-    try {
-      const projectItem = issue.projectItems.nodes[0];
-      if (!projectItem) return;
+    const projectItem = issue.projectItems?.nodes?.[0];
+    if (!projectItem) return;
 
-      const fieldValues = projectItem.fieldValues.nodes;
-      if (!fieldValues || fieldValues.length === 0) return;
+    const fieldValues = projectItem.fieldValues?.nodes || [];
+    const stageValue = fieldValues.find(
+      (value: any) => value.field?.name === 'Developer Journey Stage'
+    );
 
-      // Find the Category field value
-      const categoryFieldValue = fieldValues.find(
-        (field: any) => field.field?.name === 'Category'
-      );
-      
-      // Debug logging for Category field
-      console.log(`Issue ${issue.number} Category field:`, categoryFieldValue);
-      
-      // Only process issues with Category = "Pain Point"
-      if (!categoryFieldValue || categoryFieldValue.optionId !== 'd68c4b4b') {
-        console.log(`Skipping issue ${issue.number} - Category is not "Pain Point"`);
-        return;
+    if (!stageValue) return;
+
+    if (stageValue.optionId && stageField.options) {
+      const stageOption = stageField.options.find(opt => opt.id === stageValue.optionId);
+      if (stageOption) {
+        const stage = stageMap.get(stageOption.name);
+        if (stage?.issues) {
+          stage.issues.push(issue);
+        }
       }
-
-      // Find the Developer Journey Stage field
-      const stageFieldValue = fieldValues.find(
-        (field: any) => field.field?.name === 'Developer Journey Stage'
-      );
-      
-      if (!stageFieldValue) return;
-
-      // Get the option ID and find the corresponding option name
-      const optionId = stageFieldValue.optionId;
-      if (!optionId) return;
-
-      const option = stageField.options?.find(opt => opt.id === optionId);
-      if (!option) return;
-
-      const stageName = option.name;
-      if (stageMap.has(stageName)) {
-        const stage = stageMap.get(stageName)!;
-        
-        // Add issue to pain points
-        stage.painPoints.push({
-          title: issue.title,
-          description: issue.body || '',
-          issueNumber: issue.number,
-          url: issue.url,
-          status: issue.state,
-          labels: issue.labels.nodes.map((label: { name: string; color: string }) => label.name)
-        });
-
-        // Add issue labels to touchpoints (if not already present)
-        issue.labels.nodes.forEach(label => {
-          if (!stage.touchpoints.includes(label.name)) {
-            stage.touchpoints.push(label.name);
-          }
-        });
-      }
-    } catch (error) {
-      console.error(`Error processing issue ${issue.number}:`, error);
     }
   });
 
+  // Convert map to array and sort by stage order
   return Array.from(stageMap.values());
 } 

@@ -164,9 +164,10 @@ export function Stage({
   title,
   description,
   color,
-  actions,
-  touchpoints,
-  painPoints,
+  actions = [],
+  touchpoints = [],
+  painPoints = [],
+  issues = [],
   $headerHeight,
   onHeaderHeightChange,
   activeTags,
@@ -181,12 +182,42 @@ export function Stage({
     }
   }, [onHeaderHeightChange, title, description, isExpanded]);
 
-  // Filter pain points based on active tags
+  // Extract labels from GitHub issues
+  const githubLabels = issues.flatMap(issue => 
+    issue.labels?.nodes?.map(node => node.name) || []
+  );
+  
+  // Combine touchpoints with GitHub labels, removing duplicates
+  const allTouchpoints = Array.from(new Set([...touchpoints, ...githubLabels]));
+
+  // Filter GitHub issues to only show those with Category = "Pain Point"
+  const painPointIssues = issues.filter(issue => {
+    const categoryField = issue.projectItems?.nodes?.[0]?.fieldValues?.nodes?.find(
+      field => field.field?.name === "Category"
+    );
+    const fieldOptions = categoryField?.field?.options;
+    const optionId = categoryField?.optionId;
+    const isPainPoint = fieldOptions?.some(option => 
+      option.id === optionId && option.name === "Pain Point"
+    );
+
+    return isPainPoint;
+  });
+
+  // Filter both pain points and issues based on active tags
   const filteredPainPoints = activeTags.length > 0
     ? painPoints.filter(point => 
         activeTags.every(tag => point.labels?.includes(tag))
       )
     : painPoints;
+
+  const filteredIssues = activeTags.length > 0
+    ? painPointIssues.filter(issue =>
+        activeTags.every(tag => 
+          issue.labels?.nodes?.some(node => node.name === tag)
+        )
+      )
+    : painPointIssues;
 
   return (
     <StageWrapper>
@@ -225,7 +256,7 @@ export function Stage({
         <Section>
           <SectionTitle>Touchpoints</SectionTitle>
           <TagContainer>
-            {touchpoints.map((touchpoint, index) => (
+            {allTouchpoints.map((touchpoint, index) => (
               <Tag
                 key={index}
                 text={touchpoint}
@@ -240,7 +271,9 @@ export function Stage({
         <Section>
           <SectionTitle>
             Pain Points
-            <Counter $count={filteredPainPoints.length}>{filteredPainPoints.length}</Counter>
+            <Counter $count={filteredPainPoints.length + filteredIssues.length}>
+              {filteredPainPoints.length + filteredIssues.length}
+            </Counter>
           </SectionTitle>
           {filteredPainPoints.map((point, index) => (
             <IssueCard
@@ -248,7 +281,16 @@ export function Stage({
               title={point.title}
               url={point.url}
               labels={point.labels}
-              tagVariant="pill"
+              activeTags={activeTags}
+              onTagClick={onTagClick}
+            />
+          ))}
+          {filteredIssues.map((issue, index) => (
+            <IssueCard
+              key={`github-${index}`}
+              title={issue.title}
+              url={issue.url}
+              labels={issue.labels?.nodes?.map(node => node.name) || []}
               activeTags={activeTags}
               onTagClick={onTagClick}
             />
