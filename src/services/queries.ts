@@ -27,6 +27,7 @@ export const GITHUB_PROJECT_QUERY = `
                 title
                 body
                 state
+                url
                 createdAt
                 updatedAt
                 labels(first: 10) {
