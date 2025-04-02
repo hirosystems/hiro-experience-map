@@ -41,6 +41,8 @@ app.get('/api/health', (_req: Request, res: Response) => {
 // GitHub API endpoint
 app.get('/api/github-data', async (_req: Request, res: Response) => {
   try {
+    console.log('Starting GitHub API request...');
+
     const response = await fetch('https://api.github.com/graphql', {
       method: 'POST',
       headers: {
@@ -56,13 +58,22 @@ app.get('/api/github-data', async (_req: Request, res: Response) => {
       })
     });
 
+    console.log('GitHub API response status:', response.status);
+    const responseText = await response.text();
+    console.log('GitHub API response:', responseText);
+
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('GitHub API error response:', errorText);
+      console.error('GitHub API error response:', responseText);
       throw new Error(`GitHub API responded with status: ${response.status}`);
     }
 
-    const data = await response.json() as GitHubResponse;
+    let data;
+    try {
+      data = JSON.parse(responseText) as GitHubResponse;
+    } catch (parseError) {
+      console.error('Error parsing GitHub API response:', parseError);
+      throw new Error('Invalid JSON response from GitHub API');
+    }
     
     if (data.errors) {
       console.error('GitHub GraphQL errors:', data.errors);
