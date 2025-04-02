@@ -24,6 +24,26 @@ const StagesGrid = styled.div<StagesGridProps>`
   height: 100%;
 `;
 
+const LoadingMessage = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  font-size: 1.2rem;
+  color: #666;
+`;
+
+const ErrorMessage = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  padding: 2rem;
+  text-align: center;
+  color: #dc3545;
+`;
+
 export function App() {
   const [stages, setStages] = useState<StageData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -34,14 +54,11 @@ export function App() {
   useEffect(() => {
     async function loadIssues() {
       try {
-        const owner = process.env.REACT_APP_GITHUB_OWNER || 'hirosystems';
-        const repo = process.env.REACT_APP_GITHUB_REPO || 'hiro-experience-map';
-        const projectNumber = parseInt(process.env.REACT_APP_GITHUB_PROJECT_NUMBER || '1', 10);
-        
-        const { issues, stageField } = await fetchIssues(owner, repo, projectNumber);
+        const { issues, stageField } = await fetchIssues('hirosystems', 'hiro-experience-map', 1);
         const updatedStages = groupIssuesByStage(issues, stageField);
         setStages(updatedStages);
       } catch (err) {
+        console.error('Error loading issues:', err);
         setError(err instanceof Error ? err.message : 'Failed to load issues');
       } finally {
         setLoading(false);
@@ -76,11 +93,23 @@ export function App() {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <AppWrapper>
+        <LoadingMessage>Loading experience map...</LoadingMessage>
+      </AppWrapper>
+    );
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return (
+      <AppWrapper>
+        <ErrorMessage>
+          <h2>Error Loading Experience Map</h2>
+          <p>{error}</p>
+          <p>Please try refreshing the page.</p>
+        </ErrorMessage>
+      </AppWrapper>
+    );
   }
 
   if (stages.length === 0) {

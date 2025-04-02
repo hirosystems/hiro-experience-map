@@ -6,45 +6,52 @@ export async function fetchIssues(owner: string, repo: string, projectNumber: nu
   issues: GitHubIssue[];
   stageField: StageField | null;
 }> {
-  const response = await fetch('/api/github-data');
+  try {
+    const response = await fetch('/api/github-data');
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch issues: ${response.statusText}`);
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Error Response:', errorText);
+      throw new Error(`Failed to fetch issues: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    
+    if (data.errors) {
+      console.error('GraphQL errors:', data.errors);
+      throw new Error(`GitHub API Error: ${data.errors[0].message}`);
+    }
+
+    const organization = data.data?.organization;
+    if (!organization) {
+      console.error('Organization not found:', owner);
+      throw new Error(`Organization ${owner} not found or no access to organization`);
+    }
+
+    const project = organization.projectV2;
+    if (!project) {
+      console.error('Project not found:', projectNumber);
+      throw new Error(`Project ${projectNumber} not found or no access to project`);
+    }
+
+    const items = project.items?.nodes || [];
+
+    const stageField = project.fields?.nodes?.find(
+      (field: StageField) => field.name === 'Developer Journey Stage'
+    ) || null;
+
+    const filteredIssues = items
+      .map((node: { content?: GitHubIssue }) => node.content)
+      .filter((content: GitHubIssue | undefined): content is GitHubIssue => content !== null);
+
+    return {
+      issues: filteredIssues,
+      stageField
+    };
+  } catch (error) {
+    console.error('Error in fetchIssues:', error);
+    throw error;
   }
-
-  const data = await response.json();
-  
-  if (data.errors) {
-    console.error('GraphQL errors:', data.errors);
-    throw new Error(`GraphQL Error: ${data.errors[0].message}`);
-  }
-
-  const organization = data.data?.organization;
-  if (!organization) {
-    console.error('Organization not found:', owner);
-    throw new Error(`Organization ${owner} not found or no access to organization`);
-  }
-
-  const project = organization.projectV2;
-  if (!project) {
-    console.error('Project not found:', projectNumber);
-    throw new Error(`Project ${projectNumber} not found or no access to project`);
-  }
-
-  const items = project.items?.nodes || [];
-
-  const stageField = project.fields?.nodes?.find(
-    (field: StageField) => field.name === 'Developer Journey Stage'
-  ) || null;
-
-  const filteredIssues = items
-    .map((node: { content?: GitHubIssue }) => node.content)
-    .filter((content: GitHubIssue | undefined): content is GitHubIssue => content !== null);
-
-  return {
-    issues: filteredIssues,
-    stageField
-  };
 }
 
 export function groupIssuesByStage(issues: GitHubIssue[], stageField: StageField | null): StageData[] {
