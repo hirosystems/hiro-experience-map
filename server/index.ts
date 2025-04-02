@@ -98,9 +98,4 @@ app.get('/api/github-data', async (_req, res) => {
 const port = process.env.PORT || 3001;
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
-  console.log('Environment variables loaded:', {
-    hasToken: !!process.env.HIRO_GITHUB_TOKEN,
-    owner: process.env.HIRO_GITHUB_OWNER,
-    projectNumber: process.env.HIRO_GITHUB_PROJECT_NUMBER
-  });
 }); 
