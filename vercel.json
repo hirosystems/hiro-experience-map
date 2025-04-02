@@ -95,5 +95,10 @@
   "env": {
     "NODE_ENV": "production",
     "BUILD_TIMESTAMP": "2024-03-21T12:00:00Z"
+  },
+  "git": {
+    "deploymentEnabled": {
+      "main": true
+    }
   }
 }
