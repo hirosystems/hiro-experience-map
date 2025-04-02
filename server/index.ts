@@ -7,7 +7,16 @@ import { GitHubResponse } from '../src/types/github';
 dotenv.config();
 
 const app = express();
-app.use(cors());
+
+// Configure CORS
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://hiro-experience-map.vercel.app', 'https://hirosystems.github.io']
+    : 'http://localhost:3000',
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(express.json());
 
 // Verify environment variables are set
@@ -22,6 +31,11 @@ requiredEnvVars.forEach(envVar => {
   if (!process.env[envVar]) {
     throw new Error(`Missing required environment variable: ${envVar}`);
   }
+});
+
+// Health check endpoint
+app.get('/api/health', (_req: Request, res: Response) => {
+  res.json({ status: 'ok' });
 });
 
 // GitHub API endpoint
