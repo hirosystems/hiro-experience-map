@@ -12,7 +12,7 @@
       "src": "server/index.ts",
       "use": "@vercel/node",
       "config": {
-        "includeFiles": ["src/**"]
+        "includeFiles": ["server/**"]
       }
     }
   ],
@@ -41,5 +41,8 @@
       "src": "/(.*)",
       "dest": "/build/index.html"
     }
-  ]
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
 }
